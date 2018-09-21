@@ -362,6 +362,21 @@ class TestInspectionAndValidation(unittest.TestCase):
         self.assertTrue(AWSUMEPY.requires_mfa(mfa_profile))
         self.assertFalse(AWSUMEPY.requires_mfa(no_mfa_profile))
 
+    def test_requires_external_id(self):
+        """test requires_external_id awsumepy function"""
+        eid_profile = {
+            'aws_access_key_id':'EXAMPLE',
+            'aws_secret_access_key':'EXAMPLE',
+            'mfa_serial':'EXAMPLE',
+            'ask_for_external_id':'EXAMPLE'
+        }
+        no_eid_profile = {
+            'aws_access_key_id':'EXAMPLE',
+            'aws_secret_access_key':'EXAMPLE'
+        }
+        self.assertTrue(AWSUMEPY.requires_external_id(eid_profile))
+        self.assertFalse(AWSUMEPY.requires_external_id(no_eid_profile))
+
     def test_is_role(self):
         """test is_role awsumepy function"""
         user_profile = {

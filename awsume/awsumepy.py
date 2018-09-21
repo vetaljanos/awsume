@@ -533,6 +533,19 @@ def requires_mfa(profile):
     """
     return 'mfa_serial' in profile
 
+def requires_external_id(profile):
+    """Checks to see if the given profile requires enter external ID.
+
+    Parameters
+    ----------
+    - profile - the profile to inspect
+
+    Returns
+    -------
+    True if the profile requires external id, False if it doesn't.
+    """
+    return 'ask_for_external_id' in profile
+
 def is_role(profile):
     """Checks to see if the given profile is a role profile.
     A profile is a role profile if it contains a 'role_arn' and a 'source_profile'.
@@ -678,6 +691,22 @@ def read_mfa():
             return mfa_token
         else:
             safe_print('Please enter a valid MFA token: ', '', Fore.YELLOW)
+
+def read_external_id():
+    """Read external id from the command line.
+    If it is invalid, retry.
+
+    Returns
+    -------
+    The read secure token.
+    """
+    safe_print('Enter External ID: ', '', Fore.LIGHTCYAN_EX)
+    while True:
+        external_id = get_input()
+        if len(external_id):
+            return external_id
+        else:
+            safe_print('Please enter a valid External ID: ', '', Fore.YELLOW)
 
 def config_help(app):
     """Display the config help dialog.
@@ -932,23 +961,27 @@ def get_role_session(app, args, profiles, user_session, role_session):
                                    user_session.get('SessionToken'))
 
     try:
+        request = {
+            'RoleArn': profile['role_arn'],
+            'RoleSessionName': role_session_name,
+        }
+
+        if requires_external_id(profile):
+            request['ExternalId'] = read_external_id()
+
         if args.target_role_duration:
+            request['DurationSeconds'] = args.target_role_duration
+
             if requires_mfa(profile):
-                response = sts_client.assume_role(RoleArn=profile['role_arn'],
-                                                  RoleSessionName=role_session_name,
-                                                  DurationSeconds=args.target_role_duration,
-                                                  SerialNumber=profile.get('mfa_serial'),
-                                                  TokenCode=read_mfa())
-            else:
-                response = sts_client.assume_role(RoleArn=profile['role_arn'],
-                                                  RoleSessionName=role_session_name,
-                                                  DurationSeconds=args.target_role_duration)
-            fix_session_credentials(response['Credentials'], profiles, args)
+                request['SerialNumber'] = profile.get('mfa_serial')
+                request['TokenCode'] = read_mfa()
+
+        response = sts_client.assume_role(**request)
+        fix_session_credentials(response['Credentials'], profiles, args)
+
+        if args.target_role_duration:
             write_aws_cache(AWS_CACHE_DIRECTORY, cache_file_name, response['Credentials'])
-        else:
-            response = sts_client.assume_role(RoleArn=profile['role_arn'],
-                                              RoleSessionName=role_session_name)
-            fix_session_credentials(response['Credentials'], profiles, args)
+
         LOG.debug(response['Credentials'])
         return response['Credentials']
     except botocore.exceptions.ClientError as exception:
