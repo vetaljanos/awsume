@@ -8,6 +8,7 @@ import collections
 import logging
 import json
 import signal
+from getpass import getpass
 import shutil
 from datetime import datetime
 from builtins import input as read_input
@@ -700,13 +701,13 @@ def read_external_id():
     -------
     The read secure token.
     """
-    safe_print('Enter External ID: ', '', Fore.LIGHTCYAN_EX)
+    # safe_print('Enter External ID: ', '', Fore.LIGHTCYAN_EX)
     while True:
-        external_id = get_input()
+        external_id = getpass('Enter External ID: ')
+        # external_id = get_input()
         if len(external_id):
             return external_id
-        else:
-            safe_print('Please enter a valid External ID: ', '', Fore.YELLOW)
+
 
 def config_help(app):
     """Display the config help dialog.

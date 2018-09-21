@@ -1,6 +1,6 @@
 {
-  "name": "awsume",
-  "version": "3.2.8",
+  "name": "rvs-awsume",
+  "version": "3.2.8_3",
   "description": "Awsume - A cli that makes using AWS IAM credentials easy",
   "author": {
     "name":"Trek10, Inc",
@@ -15,5 +15,5 @@
     "download-test": "pip install -i https://test.pypi.org/simple/ awsume"
   },
   "license": "MIT",
-  "homepage": "https://github.com/trek10inc/awsume"
+  "homepage": "https://github.com/vetaljanos/awsume"
 }
