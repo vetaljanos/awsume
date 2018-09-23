@@ -23,7 +23,7 @@ from six.moves import configparser as ConfigParser
 from yapsy import PluginManager
 
 try: # pragma: no cover
-    __version__ = pkg_resources.get_distribution('awsume').version
+    __version__ = pkg_resources.get_distribution('rvs-awsume').version
 except Exception: # pragma: no cover
     pass
 
